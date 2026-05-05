@@ -7,6 +7,21 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.4.0] — 2026-05-08
+
+Webhook management commands (Milestone 11 — CLI parity for forge-mcp webhook tools).
+
+### Added
+
+- `forge webhook create --url URL --events EVENT,...` — registers a new outbound
+  webhook endpoint (HTTPS only). Prints the signing secret once.
+- `forge webhook list` — lists all registered endpoints.
+- `forge webhook delete <endpoint-id>` — removes an endpoint by ID.
+- `forge webhook deliveries <job-id>` — shows delivery log for a job.
+- `forge webhook retry <job-id>` — re-queues a dead job for delivery.
+
+---
+
 ## [0.3.0] — 2026-05-04
 
 ### Added

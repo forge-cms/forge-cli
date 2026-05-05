@@ -20,7 +20,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.3.0"
+const cliVersion = "0.4.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -40,6 +40,8 @@ func main() {
 		runTokenCommand(os.Args[2:])
 	case "media":
 		runMediaCommand(os.Args[2:])
+	case "webhook":
+		runWebhookCommand(os.Args[2:])
 	default:
 		runContentCommand(os.Args[1], os.Args[2:])
 	}
@@ -52,6 +54,7 @@ Usage:
   forge-cli init [--url URL] [--bootstrap-token TOKEN]   bootstrap a new instance
   forge-cli <type> <verb> [slug] [flags]                 content operations
   forge-cli token <verb> [args]                          token management
+  forge-cli webhook <verb> [args]                        webhook management
   forge-cli status                                       connectivity check
 
 Content verbs (type is the URL path segment, e.g. "posts", "doc-pages"):
@@ -68,6 +71,14 @@ Token verbs (Admin role required):
   create <name> <role> <ttl-days>          issue a new named token
   list                                     list all tokens
   revoke <id>                              revoke a token by fingerprint ID
+
+Webhook verbs (Admin role required):
+  create --url <URL> --events <e1,e2,...>  register a new endpoint
+  list                                     list endpoints with delivery stats
+  delete <id>                              permanently remove an endpoint
+  deliveries --job <job-id>                show delivery logs for a job
+  deliveries --endpoint <endpoint-id>      show all jobs for an endpoint
+  retry <job-id>                           re-queue a dead-lettered job
 
 Media subcommands:
   upload <file> [--description <text>]     upload a file to the media library

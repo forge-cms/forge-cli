@@ -64,9 +64,7 @@ func parseFrontmatter(content string) (map[string]any, string, error) {
 	var body string
 	if end < len(rest) {
 		after := rest[end+4:] // skip "\n---"
-		if strings.HasPrefix(after, "\n") {
-			after = after[1:]
-		}
+		after = strings.TrimPrefix(after, "\n")
 		body = after
 	}
 
