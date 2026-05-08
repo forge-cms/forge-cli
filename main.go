@@ -20,7 +20,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.4.0"
+const cliVersion = "0.5.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -42,6 +42,8 @@ func main() {
 		runMediaCommand(os.Args[2:])
 	case "webhook":
 		runWebhookCommand(os.Args[2:])
+	case "preview":
+		runPreviewCommand(os.Args[2:])
 	default:
 		runContentCommand(os.Args[1], os.Args[2:])
 	}
@@ -55,6 +57,7 @@ Usage:
   forge-cli <type> <verb> [slug] [flags]                 content operations
   forge-cli token <verb> [args]                          token management
   forge-cli webhook <verb> [args]                        webhook management
+  forge-cli preview <prefix> <slug>                      generate draft preview URL
   forge-cli status                                       connectivity check
 
 Content verbs (type is the URL path segment, e.g. "posts", "doc-pages"):
@@ -79,6 +82,9 @@ Webhook verbs (Admin role required):
   deliveries --job <job-id>                show delivery logs for a job
   deliveries --endpoint <endpoint-id>      show all jobs for an endpoint
   retry <job-id>                           re-queue a dead-lettered job
+
+Preview (Admin role required):
+  preview <prefix> <slug>                  generate signed draft preview URL (12 h)
 
 Media subcommands:
   upload <file> [--description <text>]     upload a file to the media library
