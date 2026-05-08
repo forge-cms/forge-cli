@@ -7,6 +7,19 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.5.0] — 2026-05-08
+
+Draft preview subcommand (Milestone 12, Amendment A92).
+
+### Added
+
+- `forge preview <prefix> <slug>` — generates a signed draft preview URL via the
+  `create_preview_url` MCP tool and prints it to stdout. Requires Admin role.
+  The URL grants read access to Draft or Scheduled content for the token lifetime
+  (default 12 h). Archived items return 404 even with a valid token.
+
+---
+
 ## [0.4.0] — 2026-05-08
 
 Webhook management commands (Milestone 11 — CLI parity for forge-mcp webhook tools).
