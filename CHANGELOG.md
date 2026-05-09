@@ -7,6 +7,24 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.6.0] — 2026-05-09
+
+Media subcommands and AVIF support (Milestone 13, Amendment A93).
+
+### Added
+
+- `forge-cli media upload <file> [--description <text>]` — uploads a file to
+  the Forge media library via `POST /media` with the configured bearer token.
+  `--description` is required for image files (WCAG 1.1.1). Prints the returned
+  URL on success.
+- `forge-cli media list [--type image|document|video|audio|other]` — lists all
+  media records. Prints a table of ID, type, upload date, and URL.
+- `forge-cli media delete <id>` — permanently deletes a media record by ID.
+- `.avif` added to the image extension set — AVIF uploads now require
+  `--description`, consistent with forge-media v1.2.0 AVIF support.
+
+---
+
 ## [0.5.0] — 2026-05-08
 
 Draft preview subcommand (Milestone 12, Amendment A92).
