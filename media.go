@@ -17,7 +17,7 @@ import (
 // required for these to satisfy WCAG 1.1.1.
 var imageExts = map[string]bool{
 	".jpg": true, ".jpeg": true, ".png": true,
-	".gif": true, ".webp": true, ".svg": true,
+	".gif": true, ".webp": true, ".avif": true, ".svg": true,
 }
 
 // runMediaCommand dispatches media subcommands: upload, list, delete.
