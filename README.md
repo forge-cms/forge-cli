@@ -3,7 +3,7 @@
 Command-line interface for Forge CMS instances. Manage content and tokens
 from a terminal or CI/CD pipeline.
 
-Zero third-party dependencies — requires only Go 1.22 or later.
+Zero third-party dependencies — requires only Go 1.26 or later.
 
 ---
 
@@ -140,6 +140,50 @@ forge-cli status
 
 Calls `GET /_health` and prints the JSON response. Exits non-zero if the
 server is unreachable.
+
+---
+
+## Social commands
+
+Requires a running [forge-social](https://github.com/forge-cms/forge-social) v0.4.0+ instance wired to the Forge MCP server.
+
+### Posts
+
+```bash
+forge-cli social post create --credential <id> --body "..." [--platform mastodon|linkedin] [--at <RFC3339>]
+forge-cli social post queue  --credential <id> --body "..." [--platform mastodon|linkedin]
+forge-cli social post list   [--status draft|queued|scheduled|published|failed|archived]
+forge-cli social post get    <slug>
+forge-cli social post publish <slug>
+forge-cli social post archive <slug>
+forge-cli social post delete  <slug>
+```
+
+`post create` without `--at` creates a draft. `--at` schedules for a specific time.  
+`post queue` is shorthand for `post create` with `status: queued` — the post is published at the next available slot in the credential's `PublicationSchedule`.
+
+### Credentials
+
+```bash
+forge-cli social credential create --platform mastodon|linkedin [--instance-url <url>]
+forge-cli social credential list
+```
+
+`credential create` prints the OAuth authorisation URL. Open it in a browser to connect the account.
+
+### Schedules
+
+```bash
+forge-cli social schedule create --credential <id> --slot "<weekday> HH:MM IANA/TZ" [--slot ...]
+forge-cli social schedule show   --credential <id>
+forge-cli social schedule pause  --credential <id>
+forge-cli social schedule resume --credential <id>
+forge-cli social schedule delete --credential <id>
+```
+
+Slot format: `"<weekday> <HH:MM> <IANA timezone>"` — e.g. `"monday 09:00 Europe/Copenhagen"`.  
+Multiple `--slot` flags define multiple firing times per week.  
+Each credential may have at most one schedule.
 
 ---
 
