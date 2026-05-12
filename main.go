@@ -44,6 +44,8 @@ func main() {
 		runWebhookCommand(os.Args[2:])
 	case "preview":
 		runPreviewCommand(os.Args[2:])
+	case "social":
+		runSocialCommand(os.Args[2:])
 	default:
 		runContentCommand(os.Args[1], os.Args[2:])
 	}
@@ -58,6 +60,7 @@ Usage:
   forge-cli token <verb> [args]                          token management
   forge-cli webhook <verb> [args]                        webhook management
   forge-cli preview <prefix> <slug>                      generate draft preview URL
+  forge-cli social <subcommand> [args]                   forge-social post and credential management
   forge-cli status                                       connectivity check
 
 Content verbs (type is the URL path segment, e.g. "posts", "doc-pages"):
@@ -90,6 +93,13 @@ Media subcommands:
   upload <file> [--description <text>]     upload a file to the media library
   list [--type image|document|video|other] list media records
   delete <id>                              permanently delete a media record
+
+Social subcommands:
+  post create --credential <id> --body "..." [--platform mastodon|linkedin] [--at <RFC3339>]
+  post list   [--status draft|scheduled|queued|published|archived|failed]
+  post get|publish|archive|delete <id>
+  credential create --platform mastodon|linkedin [--instance-url <url>]
+  credential list
 
 Environment variables:
   FORGE_URL      base URL of the running Forge instance (required)

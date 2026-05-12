@@ -7,6 +7,29 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.0] — 2026-05-12
+
+forge-social CLI commands — post, credential, and schedule management (M18+M19).
+
+### Added
+
+- `forge-cli social post create --credential <id> --body "..." [--platform mastodon|linkedin] [--at <RFC3339>]` — creates a draft or scheduled post via MCP.
+- `forge-cli social post queue --credential <id> --body "..." [--platform ...]` — enqueues a post for the next available PublicationSchedule slot (status `queued`).
+- `forge-cli social post list [--status <status>]` — lists posts filtered by status.
+- `forge-cli social post get <id>` — retrieves a single post.
+- `forge-cli social post publish <id>` — publishes a post immediately.
+- `forge-cli social post archive <id>` — archives a post.
+- `forge-cli social post delete <id>` — permanently deletes a post.
+- `forge-cli social credential create --platform mastodon|linkedin [--instance-url <url>]` — starts OAuth flow and prints the authorization URL.
+- `forge-cli social credential list` — lists all configured credentials.
+- `forge-cli social schedule create --credential <id> --slot "<weekday> HH:MM IANA/TZ" [--slot ...]` — creates a recurring publication schedule.
+- `forge-cli social schedule show --credential <id>` — shows the schedule for a credential.
+- `forge-cli social schedule pause --credential <id>` — suspends the schedule.
+- `forge-cli social schedule resume --credential <id>` — reactivates a paused schedule.
+- `forge-cli social schedule delete --credential <id>` — removes the schedule.
+
+---
+
 ## [0.6.0] — 2026-05-09
 
 Media subcommands and AVIF support (Milestone 13, Amendment A93).
