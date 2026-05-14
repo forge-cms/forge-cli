@@ -7,6 +7,23 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.0] — 2026-05-14
+
+forge-social CLI parity — credential get/delete, platform configure, X support.
+
+### Added
+
+- `forge-cli social credential get <id>` — retrieves a single credential by slug via `get_social_credential`.
+- `forge-cli social credential delete <id>` — permanently deletes a credential via `delete_social_credential`.
+- `forge-cli social platform configure --platform mastodon|linkedin|x --client-id <id> --client-secret <secret> --redirect-url <url> [--instance-url <url>] [--success-url <url>]` — configures per-platform OAuth 2.0 app credentials via `create_platform_config`. Never echoes secrets.
+
+### Changed
+
+- `forge-cli social credential create` — now accepts `--platform x`. Fatal error if `--instance-url` is provided for platform `x`.
+- `forge-cli social post create/queue` — help text updated to show `mastodon|linkedin|x` for `--platform`.
+
+---
+
 ## [0.7.0] — 2026-05-12
 
 forge-social CLI commands — post, credential, and schedule management (M18+M19).

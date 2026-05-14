@@ -20,7 +20,7 @@ import (
 	"os"
 )
 
-const cliVersion = "0.6.0"
+const cliVersion = "0.8.0"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -60,7 +60,7 @@ Usage:
   forge-cli token <verb> [args]                          token management
   forge-cli webhook <verb> [args]                        webhook management
   forge-cli preview <prefix> <slug>                      generate draft preview URL
-  forge-cli social <subcommand> [args]                   forge-social post and credential management
+  forge-cli social <subcommand> [args]                   forge-social post, credential, and platform management
   forge-cli status                                       connectivity check
 
 Content verbs (type is the URL path segment, e.g. "posts", "doc-pages"):
@@ -95,11 +95,14 @@ Media subcommands:
   delete <id>                              permanently delete a media record
 
 Social subcommands:
-  post create --credential <id> --body "..." [--platform mastodon|linkedin] [--at <RFC3339>]
+  post create --credential <id> --body "..." [--platform mastodon|linkedin|x] [--at <RFC3339>]
   post list   [--status draft|scheduled|queued|published|archived|failed]
   post get|publish|archive|delete <id>
-  credential create --platform mastodon|linkedin [--instance-url <url>]
+  credential create --platform mastodon|linkedin|x [--instance-url <url>]
   credential list
+  credential get <id>
+  credential delete <id>
+  platform configure --platform mastodon|linkedin|x --client-id <id> --client-secret <secret> --redirect-url <url> [--instance-url <url>] [--success-url <url>]
 
 Environment variables:
   FORGE_URL      base URL of the running Forge instance (required)

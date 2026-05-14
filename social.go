@@ -23,8 +23,10 @@ func runSocialCommand(args []string) {
 		runSocialCredentialCommand(args[1:])
 	case "schedule":
 		runSocialScheduleCommand(args[1:])
+	case "platform":
+		runSocialPlatformCommand(args[1:])
 	default:
-		fatal("unknown social subcommand %q — use: post credential schedule", args[0])
+		fatal("unknown social subcommand %q — use: post credential schedule platform", args[0])
 	}
 }
 
@@ -35,10 +37,11 @@ Subcommands:
   post        <verb> [args]   manage scheduled social posts
   credential  <verb> [args]   manage platform OAuth credentials
   schedule    <verb> [args]   manage publication schedules
+  platform    <verb> [args]   manage per-platform OAuth app configuration
 
 Post verbs:
-  create  --credential <id> --body "..." [--platform mastodon|linkedin] [--at <RFC3339>]
-  queue   --credential <id> --body "..." [--platform mastodon|linkedin]
+  create  --credential <id> --body "..." [--platform mastodon|linkedin|x] [--at <RFC3339>]
+  queue   --credential <id> --body "..." [--platform mastodon|linkedin|x]
   list    [--status draft|scheduled|queued|published|archived|failed]
   get     <id>
   publish <id>
@@ -46,8 +49,10 @@ Post verbs:
   delete  <id>
 
 Credential verbs:
-  create  --platform mastodon|linkedin [--instance-url <url>]
+  create  --platform mastodon|linkedin|x [--instance-url <url>]
   list
+  get     <id>
+  delete  <id>
 
 Schedule verbs:
   create  --credential <id> --slot "<weekday> HH:MM IANA/TZ" [--slot ...]
@@ -55,6 +60,9 @@ Schedule verbs:
   pause   --credential <id>
   resume  --credential <id>
   delete  --credential <id>
+
+Platform verbs:
+  configure  --platform mastodon|linkedin|x --client-id <id> --client-secret <secret> --redirect-url <url> [--instance-url <url>] [--success-url <url>]
 
 The MCP endpoint is used for all social operations (FORGE_MCP_URL).
 `)
@@ -93,8 +101,8 @@ func printSocialPostHelp() {
 	fmt.Fprint(os.Stdout, `forge-cli social post — scheduled post management
 
 Verbs:
-  create  --credential <id> --body "..." [--platform mastodon|linkedin] [--at <RFC3339>]
-  queue   --credential <id> --body "..." [--platform mastodon|linkedin]
+  create  --credential <id> --body "..." [--platform mastodon|linkedin|x] [--at <RFC3339>]
+  queue   --credential <id> --body "..." [--platform mastodon|linkedin|x]
   list    [--status draft|scheduled|queued|published|archived|failed]
   get     <id>
   publish <id>
@@ -272,8 +280,12 @@ func runSocialCredentialCommand(args []string) {
 		runSocialCredentialCreate(args[1:])
 	case "list":
 		runSocialCredentialList(args[1:])
+	case "get":
+		runSocialCredentialGet(args[1:])
+	case "delete":
+		runSocialCredentialDelete(args[1:])
 	default:
-		fatal("unknown credential verb %q — use: create list", args[0])
+		fatal("unknown credential verb %q — use: create list get delete", args[0])
 	}
 }
 
@@ -281,8 +293,10 @@ func printSocialCredentialHelp() {
 	fmt.Fprint(os.Stdout, `forge-cli social credential — platform OAuth credential management
 
 Verbs:
-  create  --platform mastodon|linkedin [--instance-url <url>]
+  create  --platform mastodon|linkedin|x [--instance-url <url>]
   list
+  get     <id>
+  delete  <id>
 `)
 }
 
@@ -303,7 +317,10 @@ func runSocialCredentialCreate(args []string) {
 		}
 	}
 	if platform == "" {
-		fatal("social credential create requires --platform mastodon|linkedin")
+		fatal("social credential create requires --platform mastodon|linkedin|x")
+	}
+	if instanceURL != "" && platform == "x" {
+		fatal("--instance-url is not supported for platform x")
 	}
 
 	params := map[string]any{"platform": platform}
@@ -349,6 +366,42 @@ func runSocialCredentialList(args []string) {
 	}
 	if err := printJSON([]byte(text)); err != nil {
 		fatal("%v", err)
+	}
+}
+
+func runSocialCredentialGet(args []string) {
+	if len(args) == 0 {
+		fatal("social credential get requires <id>")
+	}
+	cfg, err := loadConfig()
+	if err != nil {
+		fatal("%v", err)
+	}
+	text, err := mcpCall(cfg, "get_social_credential", map[string]any{"slug": args[0]})
+	if err != nil {
+		fatal("%v", err)
+	}
+	if err := printJSON([]byte(text)); err != nil {
+		fatal("%v", err)
+	}
+}
+
+func runSocialCredentialDelete(args []string) {
+	if len(args) == 0 {
+		fatal("social credential delete requires <id>")
+	}
+	cfg, err := loadConfig()
+	if err != nil {
+		fatal("%v", err)
+	}
+	text, err := mcpCall(cfg, "delete_social_credential", map[string]any{"slug": args[0]})
+	if err != nil {
+		fatal("%v", err)
+	}
+	if text != "" {
+		if err := printJSON([]byte(text)); err != nil {
+			fatal("%v", err)
+		}
 	}
 }
 
@@ -612,6 +665,121 @@ func findScheduleByCredential(cfg Config, credentialID string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("no schedule found for credential %q", credentialID)
+}
+
+// ─── platform subcommands ─────────────────────────────────────────────────────
+
+func runSocialPlatformCommand(args []string) {
+	if len(args) == 0 {
+		printSocialPlatformHelp()
+		os.Exit(1)
+	}
+	switch args[0] {
+	case "-h", "--help", "help":
+		printSocialPlatformHelp()
+	case "configure":
+		runSocialPlatformConfigure(args[1:])
+	default:
+		fatal("unknown platform verb %q — use: configure", args[0])
+	}
+}
+
+func printSocialPlatformHelp() {
+	fmt.Fprint(os.Stdout, `forge-cli social platform — per-platform OAuth app configuration
+
+Verbs:
+  configure  --platform mastodon|linkedin|x \
+             --client-id <id> \
+             --client-secret <secret> \
+             --redirect-url <url> \
+             [--instance-url <url>]  (mastodon only) \
+             [--success-url <url>]
+`)
+}
+
+func runSocialPlatformConfigure(args []string) {
+	var platform, clientID, clientSecret, redirectURL, instanceURL, successURL string
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--platform":
+			if i+1 < len(args) {
+				platform = args[i+1]
+				i++
+			}
+		case "--client-id":
+			if i+1 < len(args) {
+				clientID = args[i+1]
+				i++
+			}
+		case "--client-secret":
+			if i+1 < len(args) {
+				clientSecret = args[i+1]
+				i++
+			}
+		case "--redirect-url":
+			if i+1 < len(args) {
+				redirectURL = args[i+1]
+				i++
+			}
+		case "--instance-url":
+			if i+1 < len(args) {
+				instanceURL = args[i+1]
+				i++
+			}
+		case "--success-url":
+			if i+1 < len(args) {
+				successURL = args[i+1]
+				i++
+			}
+		}
+	}
+	if platform == "" {
+		fatal("social platform configure requires --platform mastodon|linkedin|x")
+	}
+	if clientID == "" {
+		fatal("social platform configure requires --client-id <id>")
+	}
+	if clientSecret == "" {
+		fatal("social platform configure requires --client-secret <secret>")
+	}
+	if redirectURL == "" {
+		fatal("social platform configure requires --redirect-url <url>")
+	}
+	if instanceURL != "" && platform != "mastodon" {
+		fatal("--instance-url is only supported for platform mastodon")
+	}
+
+	params := map[string]any{
+		"platform":      platform,
+		"client_id":     clientID,
+		"client_secret": clientSecret,
+		"redirect_url":  redirectURL,
+	}
+	if instanceURL != "" {
+		params["instance_url"] = instanceURL
+	}
+	if successURL != "" {
+		params["success_url"] = successURL
+	}
+
+	cfg, err := loadConfig()
+	if err != nil {
+		fatal("%v", err)
+	}
+	text, err := mcpCall(cfg, "create_platform_config", params)
+	if err != nil {
+		fatal("%v", err)
+	}
+	// Platform config is stored — never echo credentials back.
+	// Print a minimal confirmation from the server response if present.
+	var result struct {
+		Message string `json:"message"`
+	}
+	if jsonErr := json.Unmarshal([]byte(text), &result); jsonErr == nil && result.Message != "" {
+		fmt.Println(result.Message)
+		return
+	}
+	fmt.Printf("Platform %q configured.\n", platform)
 }
 
 // parseSlot parses a slot string of the form "<weekday> <HH:MM> <IANA timezone>".

@@ -145,13 +145,13 @@ server is unreachable.
 
 ## Social commands
 
-Requires a running [forge-social](https://github.com/forge-cms/forge-social) v0.4.0+ instance wired to the Forge MCP server.
+Requires a running [forge-social](https://github.com/forge-cms/forge-social) v0.5.0+ instance wired to the Forge MCP server.
 
 ### Posts
 
 ```bash
-forge-cli social post create --credential <id> --body "..." [--platform mastodon|linkedin] [--at <RFC3339>]
-forge-cli social post queue  --credential <id> --body "..." [--platform mastodon|linkedin]
+forge-cli social post create --credential <id> --body "..." [--platform mastodon|linkedin|x] [--at <RFC3339>]
+forge-cli social post queue  --credential <id> --body "..." [--platform mastodon|linkedin|x]
 forge-cli social post list   [--status draft|queued|scheduled|published|failed|archived]
 forge-cli social post get    <slug>
 forge-cli social post publish <slug>
@@ -165,11 +165,29 @@ forge-cli social post delete  <slug>
 ### Credentials
 
 ```bash
-forge-cli social credential create --platform mastodon|linkedin [--instance-url <url>]
+forge-cli social credential create --platform mastodon|linkedin|x [--instance-url <url>]
 forge-cli social credential list
+forge-cli social credential get    <id>
+forge-cli social credential delete <id>
 ```
 
-`credential create` prints the OAuth authorisation URL. Open it in a browser to connect the account.
+`credential create` prints the OAuth authorisation URL. Open it in a browser to connect the account.  
+`--instance-url` is only accepted for platform `mastodon`. Providing it for `x` is a fatal error.
+
+### Platform configuration
+
+Configures the OAuth 2.0 app credentials for a platform (client ID, client secret, redirect URL).  
+Requires Admin role. Credentials are stored encrypted server-side and never echoed back.
+
+```bash
+forge-cli social platform configure \
+  --platform mastodon|linkedin|x \
+  --client-id <id> \
+  --client-secret <secret> \
+  --redirect-url <url> \
+  [--instance-url <url>]   # mastodon only \
+  [--success-url <url>]
+```
 
 ### Schedules
 
